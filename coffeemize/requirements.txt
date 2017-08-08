@@ -1,0 +1,15 @@
+appdirs==1.4.2
+Django==1.10.6
+django-cors-headers==2.0.2
+django-environ==0.4.1
+djangorestframework==3.5.4
+djangorestframework-jwt==1.9.0
+foursquare==1!2016.9.12
+olefile==0.44
+packaging==16.8
+Pillow==4.0.0
+PyJWT==1.4.2
+pyparsing==2.1.10
+requests==2.13.0
+rest-framework-auth0==0.2.0
+six==1.10.0
