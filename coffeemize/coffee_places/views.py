@@ -18,13 +18,6 @@ User = get_user_model()
 
 def pad_image_to_square(img):
     image = Image.open(BytesIO(img))
-    # size = (400, 400)
-    # image.thumbnail(size, Image.ANTIALIAS)
-    # background = Image.new('RGBA', size, (255, 255, 255, 0))
-    # background.paste(
-    #     image, (int((size[0] - image.size[0]) / 2), int((size[1] - image.size[1]) / 2))
-    # )
-    # background.save("/Users/kateryna/PycharmProjects/coffeemize/coffee_places/output.bmp")
     longer_side = max(image.size)
     horizontal_padding = (longer_side - image.size[0]) / 2
     vertical_padding = (longer_side - image.size[1]) / 2
