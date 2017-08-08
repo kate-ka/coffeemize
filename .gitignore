@@ -102,3 +102,4 @@ ENV/
 media/
 .DS_Store
 *sqlite3
+/.idea
