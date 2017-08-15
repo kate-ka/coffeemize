@@ -4,6 +4,7 @@ from django.db import models
 
 from django.conf import settings
 
+from .utils.image import crop_image_to_square
 from .core.search_backends.foursquare_backend import FoursquareBackend
 
 
@@ -28,9 +29,8 @@ class CoffeePlace(models.Model):
         if not self.avatar:
             avatar_url = FoursquareBackend().get_venue_avatar(self.foursquare_id)
             if avatar_url:
-                avatar = requests.get(avatar_url).content
-                self.avatar.save(avatar_url.split('/')[-1], ContentFile(avatar), save=True)
-        return self.avatar.url
+                avatar = crop_image_to_square(requests.get(avatar_url).content, avatar=True)
+                self.avatar.save(avatar_url.split('/')[-1], avatar, save=True)
 
     def __str__(self):
         return self.name
@@ -51,6 +51,3 @@ class Suggestion(models.Model):
 
     def __str__(self):
         return '{} suggested to {}'.format(self.coffee_place.name, self.user.username)
-
-
-

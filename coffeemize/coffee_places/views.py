@@ -1,45 +1,28 @@
 import requests
-from PIL import Image
-from io import BytesIO
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+
+from .utils.image import crop_image_to_square
 from .core.search_backends.foursquare_backend import FoursquareBackend
 from .core.suggestion_algorithms.random_algorithm import RandomPlaceAlgorithm
 
 from .models import CoffeePlace, Suggestion
 from .serializers import CoffeePlaceSerializer, SuggestionSerializer
-from django.core.files.base import ContentFile
 
 
 User = get_user_model()
-
-def pad_image_to_square(img):
-    image = Image.open(BytesIO(img))
-    longer_side = max(image.size)
-    horizontal_padding = (longer_side - image.size[0]) / 2
-    vertical_padding = (longer_side - image.size[1]) / 2
-    img5 = image.crop(
-        (
-            -horizontal_padding,
-            -vertical_padding,
-            image.size[0] + horizontal_padding,
-            image.size[1] + vertical_padding
-        )
-    )
-    buffer = BytesIO()
-    img5.save(fp=buffer, format='JPEG')
-    buff_val = buffer.getvalue()
-    return ContentFile(buff_val)
 
 
 class RandomCoffeePlace(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        coffee_places = FoursquareBackend().get_venues(query='сoffee', near='Lviv')
+        city = self.request.GET.get('city', 'Lviv')
+        coffee_places = FoursquareBackend().get_venues(section='coffee', near=city, query='')
+
         already_suggested_places = Suggestion.objects.filter(
             coffee_place__uid__in=[item['uid'] for item in coffee_places],
             user=request.user
@@ -51,7 +34,7 @@ class RandomCoffeePlace(APIView):
         instance.get_place_avatar()
 
         if created and image_url:
-            image = pad_image_to_square(requests.get(image_url).content)
+            image = crop_image_to_square(requests.get(image_url).content)
             image_name = image_url.split('/')[-1]
             instance.image.save(image_name, image, save=True)
 

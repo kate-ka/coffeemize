@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-v1/random_coffee_place/$', views.RandomCoffeePlace.as_view()),
     url(r'^api-v1/userplaces/$', views.CreateUserSuggestion.as_view()),
-    url(r'^api-v1/suggestion/(?P<pk>[0-9]+)/$', views.UpdateSuggestion.as_view())
+    url(r'^api-v1/suggestion  /(?P<pk>[0-9]+)/$', views.UpdateSuggestion.as_view())
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

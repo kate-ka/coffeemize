@@ -11,13 +11,14 @@ class FoursquareBackend(object):
             client_secret=settings.CLIENT_SECRET,
             version='20120609')
 
-    def get_venues(self, query, near):
+    def get_venues(self, query, near, section):
         venues = self.client.venues.explore(
             params={
                 'query': query,
                 'near': near,
                 'venuePhotos': True,
                 'radius': 30000,
+                'section': section
 
             }
         )['groups'][0]['items']
