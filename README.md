@@ -22,4 +22,12 @@ The Accounts app is a very simple and contains just a User model a bit changed f
 - Django REST framework 3.5
 - Angular 1.4
 
+## Installation guideline
+
+ - Activate your virtual environment: `source <virtual_env>/bin/activate`
+ - Install needed packages: `pip install -r requirements.txt`
+ - Syncdb: `python manage.py migrate`
+ - Run Django server: `python manage.py runserver`
+ - Run Frontend: `npm install`, `bower install`, `grunt serve`
+
 Coffeemize frontend is here: https://github.com/kate-ka/coffeemize_frontend
