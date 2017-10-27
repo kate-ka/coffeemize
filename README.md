@@ -20,3 +20,6 @@ The Accounts app is a very simple and contains just a User model a bit changed f
 - Python 3.5
 - Django 1.10
 - Django REST framework 3.5
+- Angular 1.4
+
+Coffeemize frontend is here: https://github.com/kate-ka/coffeemize_frontend
