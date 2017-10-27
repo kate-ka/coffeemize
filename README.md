@@ -1,5 +1,5 @@
 # coffeemize
-
+Coffeemize is an app that randomly shows to a logged-in user coffeeplaces  in Lviv. 
 
 The project has two apps:
 
