@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 
 from .utils.image import crop_image_to_square
 from .core.search_backends.foursquare_backend import FoursquareBackend
@@ -20,7 +20,7 @@ class RandomCoffeePlace(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        city = self.request.GET.get('city', 'Lviv')
+        city = request.GET.get('city', 'Lviv')
         coffee_places = FoursquareBackend().get_venues(section='coffee', near=city, query='')
 
         already_suggested_places = Suggestion.objects.filter(
@@ -37,7 +37,6 @@ class RandomCoffeePlace(APIView):
             image = crop_image_to_square(requests.get(image_url).content)
             image_name = image_url.split('/')[-1]
             instance.image.save(image_name, image, save=True)
-
 
         serializer = CoffeePlaceSerializer(instance, context={'request': request})
 
@@ -59,6 +58,15 @@ class UpdateSuggestion(RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
 
+
+class Statistics(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CoffeePlaceSerializer
+
+    def get(self, request, coffee_place):
+        instance = CoffeePlace.objects.get(id=coffee_place)
+        serializer = CoffeePlaceSerializer(instance=instance, context={'request': request})
+        return Response(serializer.data)
 
 
 
