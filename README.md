@@ -7,7 +7,7 @@ The project has two apps:
 * Accounts
 
 ## Coffee places
-The Coffee places app has venues, obtained from [https://foursquare.com/], which are proposed to the user according to random suggestions algorithm. The user's choices are saved so that suggestions won't be repeated.
+The Coffee places app has venues, obtained from https://foursquare.com/, which are proposed to the user according to random suggestions algorithm. The user's choices are saved so that suggestions won't be repeated.
 
 
 ## Accounts App
