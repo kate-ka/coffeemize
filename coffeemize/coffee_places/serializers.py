@@ -1,14 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
-from  . models import CoffeePlace, Suggestion
+
+from .models import CoffeePlace, Suggestion, Visit
 
 
 class CoffeePlaceSerializer(serializers.ModelSerializer):
 
     suggestion = serializers.SerializerMethodField()
-    first_visit = serializers.SerializerMethodField()
     visitors_number = serializers.SerializerMethodField()
     said_never = serializers.SerializerMethodField()
+    said_never_after_visit = serializers.SerializerMethodField()
+    user_visits_count = serializers.SerializerMethodField()
 
     class Meta:
 
@@ -17,7 +19,6 @@ class CoffeePlaceSerializer(serializers.ModelSerializer):
 
     def get_suggestion(self, obj):
         try:
-            # TODO: find how we can get request in serializer
             user = None
             request = self.context.get("request")
             if request and hasattr(request, "user"):
@@ -26,27 +27,31 @@ class CoffeePlaceSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             pass
 
-    def get_first_visit(self, obj):
-        user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-        suggestion = Suggestion.objects.filter(user=user, coffee_place=obj, visited__isnull=True)
-        return suggestion.count() > 0
-
     def get_visitors_number(self, obj):
-        return obj.suggestions.filter(visited=True).count()
+        return obj.suggestions.filter(going=True).count()
 
     def get_said_never(self, obj):
         return obj.suggestions.filter(never_show=True).count()
 
+    def get_said_never_after_visit(self, obj):
+        obj.suggestions.filter(never_show=True, going=True).count()
+
+    def get_user_visits_count(self, obj):
+        try:
+            user = None
+            request = self.context.get("request")
+            if request and hasattr(request, "user"):
+                user = request.user
+            return Visit.objects.filter(suggestion__user=user, suggestion__coffee_place=obj).count()
+        except ObjectDoesNotExist:
+            pass
 
 
 class SuggestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Suggestion
-        fields = ('visited', 'going', 'show_later', 'never_show', 'id', 'coffee_place')
+        fields = ('going', 'show_later', 'never_show', 'id', 'coffee_place')
 
 
 

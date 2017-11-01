@@ -1,5 +1,4 @@
 import requests
-from django.core.files.base import ContentFile
 from django.db import models
 
 from django.conf import settings
@@ -37,7 +36,6 @@ class CoffeePlace(models.Model):
 
 
 class Suggestion(models.Model):
-    visited = models.NullBooleanField()
     going = models.NullBooleanField()
     show_later = models.NullBooleanField()
     never_show = models.NullBooleanField()
@@ -51,3 +49,11 @@ class Suggestion(models.Model):
 
     def __str__(self):
         return '{} suggested to {}'.format(self.coffee_place.name, self.user.username)
+
+
+class Visit(models.Model):
+    suggestion = models.ForeignKey(Suggestion, related_name="visits")
+    visit_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return "{} visited by {}".format(self.suggestion.coffee_place, self.suggestion.user)

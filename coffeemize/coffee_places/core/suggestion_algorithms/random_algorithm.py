@@ -2,6 +2,8 @@ import datetime
 from datetime import timedelta
 import random
 
+from django.utils import timezone
+
 
 class RandomPlaceAlgorithm(object):
     """
@@ -31,9 +33,9 @@ class RandomPlaceAlgorithm(object):
                 if suggestion.never_show:
                     banned_places_uids.append(suggestion.coffee_place.uid)
 
-                if suggestion.visited:
-                    today = datetime.date.today()
-                    visited_date = suggestion.modified.date()
+                if suggestion.visits.all():
+                    today = timezone.now()
+                    visited_date = suggestion.visits.latest("visit_date").visit_date
                     if today - visited_date < timedelta(7):
                         banned_places_uids.append(suggestion.coffee_place.uid)
 
@@ -52,7 +54,7 @@ class RandomPlaceAlgorithm(object):
 
         """
         coffeeplaces = [place for place in self.places if place['uid'] not in self._get_banned_places()]
-        random_coffeshop_data = random.choice(coffeeplaces)
+        random_coffeshop_data = random.choice(coffeeplaces) if coffeeplaces else None
         return random_coffeshop_data
 
 

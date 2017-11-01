@@ -1,5 +1,6 @@
 import requests
 from django.contrib.auth import get_user_model
+from django.http.response import HttpResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +10,7 @@ from .utils.image import crop_image_to_square
 from .core.search_backends.foursquare_backend import FoursquareBackend
 from .core.suggestion_algorithms.random_algorithm import RandomPlaceAlgorithm
 
-from .models import CoffeePlace, Suggestion
+from .models import CoffeePlace, Suggestion, Visit
 from .serializers import CoffeePlaceSerializer, SuggestionSerializer
 
 
@@ -28,27 +29,35 @@ class RandomCoffeePlace(APIView):
             user=request.user
         )
         coffeeshop_data = RandomPlaceAlgorithm(coffee_places, already_suggested_places).get_random_place()
+        if coffeeshop_data:
 
-        image_url = coffeeshop_data.pop('image_url')
-        instance, created = CoffeePlace.objects.get_or_create(uid=coffeeshop_data['uid'], defaults=coffeeshop_data)
-        instance.get_place_avatar()
+            image_url = coffeeshop_data.pop('image_url')
+            instance, created = CoffeePlace.objects.get_or_create(uid=coffeeshop_data['uid'], defaults=coffeeshop_data)
+            instance.get_place_avatar()
 
-        if created and image_url:
-            image = crop_image_to_square(requests.get(image_url).content)
-            image_name = image_url.split('/')[-1]
-            instance.image.save(image_name, image, save=True)
+            if created and image_url:
+                image = crop_image_to_square(requests.get(image_url).content)
+                image_name = image_url.split('/')[-1]
+                instance.image.save(image_name, image, save=True)
 
-        serializer = CoffeePlaceSerializer(instance, context={'request': request})
+            serializer = CoffeePlaceSerializer(instance, context={'request': request})
 
 
+            return Response(serializer.data)
+        serializer = CoffeePlaceSerializer(None, context={'request': request})
         return Response(serializer.data)
+
 
 
 class CreateUserSuggestion(CreateAPIView):
     serializer_class = SuggestionSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+
+        suggestion = serializer.save(user=self.request.user)
+        if serializer.validated_data.get('going'):
+            Visit.objects.create(suggestion=suggestion)
+
 
 
 class UpdateSuggestion(RetrieveUpdateAPIView):
@@ -56,7 +65,10 @@ class UpdateSuggestion(RetrieveUpdateAPIView):
     serializer_class = SuggestionSerializer
 
     def perform_update(self, serializer):
-        serializer.save(user=self.request.user)
+
+        suggestion = serializer.save(user=self.request.user)
+        if serializer.validated_data.get('going'):
+            Visit.objects.create(suggestion=suggestion)
 
 
 class Statistics(APIView):
