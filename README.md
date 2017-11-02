@@ -29,5 +29,6 @@ The Accounts app is a very simple and contains just a User model a bit changed f
  - Syncdb: `python manage.py migrate`
  - Run Django server: `python manage.py runserver`
  - Run Frontend: `npm install`, `bower install`, `grunt serve`
+ - Run Tests: `python manage.py test`
 
 Coffeemize frontend is here: https://github.com/kate-ka/coffeemize_frontend
