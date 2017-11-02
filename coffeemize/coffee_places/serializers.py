@@ -34,7 +34,7 @@ class CoffeePlaceSerializer(serializers.ModelSerializer):
         return obj.suggestions.filter(never_show=True).count()
 
     def get_said_never_after_visit(self, obj):
-        obj.suggestions.filter(never_show=True, going=True).count()
+        return obj.suggestions.filter(never_show=True, going=True).count()
 
     def get_user_visits_count(self, obj):
         try:

@@ -29,7 +29,6 @@ class PlaceTestCase(TestCase):
     """
     client_class = APIClient
 
-
     def setUp(self):
         self.user = User.objects.create(username="email@email.com")
         self.venue = CoffeePlace.objects.create(name="Coffee Place", rating=5)
@@ -83,7 +82,7 @@ class PlaceTestCase(TestCase):
         self.assertTrue(response.status_code, HTTP_200_OK)
         self.assertEqual(Visit.objects.filter(suggestion=suggestion).count(), 2)
 
-    def test_coffeeplace_statics_returns_returns_visit_counts_after_update_view(self):
+    def test_coffeeplace_statics_returns_visit_counts_after_update_view(self):
 
         s = Suggestion.objects.create(going=True, user=self.user, coffee_place=self.venue)
         response = self.client.get(
@@ -114,5 +113,43 @@ class PlaceTestCase(TestCase):
             HTTP_AUTHORIZATION="Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.",
         )
         self.assertEqual(response.json()['user_visits_count'], 2)
+
+    def test_coffeeplace_statics_returns_visitors_number(self):
+        user_2 =  User.objects.create(username="new_user_email@email.com")
+        user_3 = User.objects.create(username="next_user_email@email.com")
+        Suggestion.objects.create(going=True, user=self.user, coffee_place=self.venue)
+        Suggestion.objects.create(going=True, user=user_2, coffee_place=self.venue)
+        Suggestion.objects.create(going=True, user=user_3, coffee_place=self.venue)
+        response = self.client.get(
+            path='/api-v1/place/' + str(self.venue.id) + '/statistics/',
+            HTTP_AUTHORIZATION="Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.",
+        )
+        self.assertEqual(response.json()["visitors_number"], 3)
+
+    def test_coffeeplace_statics_returns_said_never(self):
+        Suggestion.objects.create(never_show=True, user=self.user, coffee_place=self.venue)
+        Suggestion.objects.update(never_show=True, user=self.user, coffee_place=self.venue)
+        response = self.client.get(
+            path='/api-v1/place/' + str(self.venue.id) + '/statistics/',
+            HTTP_AUTHORIZATION="Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.",
+        )
+        self.assertEqual(response.json()["said_never"], 1)
+
+    def test_coffeeplace_statics_returns_said_never_after_visit(self):
+        Suggestion.objects.create(user=self.user, coffee_place=self.venue)
+        response = self.client.get(
+            path='/api-v1/place/' + str(self.venue.id) + '/statistics/',
+            HTTP_AUTHORIZATION="Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.",
+        )
+        self.assertEqual(response.json()["said_never_after_visit"], 0)
+        Suggestion.objects.update(going=True, never_show=True, user=self.user, coffee_place=self.venue)
+        response = self.client.get(
+            path='/api-v1/place/' + str(self.venue.id) + '/statistics/',
+            HTTP_AUTHORIZATION="Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.",
+        )
+        self.assertEqual(response.json()["said_never_after_visit"], 1)
+
+
+
 
 
